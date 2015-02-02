@@ -1,24 +1,32 @@
-p The current time is {{time}}. Total {{orders.length}} orders.
-
-This code is <strong>not</strong> escaped 
-
+<h1>Kitchen Monitor <a class='btn btn-lg btn-primary' href="/view1">Refresh</a></h1>
+<input type="checkbox" ng-model="seehistory" ng-change="toggleHistory()"> Show Done Orders Only<br/>
 table.table-striped.table-bordered.table-condensed
     tr
-        td(dir-paginate="order in orders | itemsPerPage: 3", valign="top")
+        td(colspan="3") <dir-pagination-controls template-url="bower_components/angular-utils-pagination/dirPagination.tpl.html"></dir-pagination-controls>
+    tr
+        td(dir-paginate="order in shownorders | itemsPerPage: 3", valign="top")
             table.table.table-striped.table-bordered.table-condensed
                 tr
                     th(colspan="3") Order#: {{order["Daily Order Sequence"]}} :: Server :: {{order["Server"]}}
-                tr(ng-repeat="item in order.items.rows")
+                    td
+                        span(ng-show="order['mon_all_done'] != 1")
+                            button.btn.btn-danger.btn-lg(ng-click="alldone(order['Number'])") ALL DONE
+                        span(ng-show="order['mon_all_done'] == 1")
+                            button.btn.btn-lg(ng-click="undoalldone(order['Number'])") ALL DONE
+                tr(ng-repeat="item in order.items")
                     td
                         {{item["Quantity"]}}
                     td
-                        {{item["Receipt Description"]}}
-                    td 
-                        <timer start-time="startTime(order)">{{days}}d{{hours}}h{{minutes}} min, {{seconds}} sec.</timer>
+                        <label class="done-{{item['mon_done']}}">{{getDescription(item)}}</lable>
+                    td
+                        span(ng-show="item['mon_done'] != 1")
+                            <timer start-time="startTime(order)">{{days}}d{{hours}}h{{minutes}} min, {{seconds}} sec.</timer>
+                        span(ng-show="item['mon_done'] == 1")
+                            {{item['time_done']}}
                     td
                         span(ng-show="item['mon_done'] == 1")
-                            button.btn.btn-primary.btn-sm(ng-click="undone(order['Number'],item['Number'])") Redo/Undone
+                            button.btn.btn-lg(ng-click="undone(order['Number'],item['Number'])") Done
                         span(ng-show="item['mon_done'] != 1")
-                            button.btn.btn-primary.btn-sm(ng-click="done(order['Number'],item['Number'])") Done
+                            button.btn.btn-primary.btn-lg(ng-click="done(order['Number'],item['Number'])") Done
     tr
         td(colspan="3") <dir-pagination-controls template-url="bower_components/angular-utils-pagination/dirPagination.tpl.html"></dir-pagination-controls>

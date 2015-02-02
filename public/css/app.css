@@ -28,3 +28,8 @@
   content: "";
   padding: 0;
 }
+
+.done-1 {
+  text-decoration: line-through;
+  color: grey;
+}

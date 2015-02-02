@@ -5,11 +5,42 @@
 angular.module('myApp.controllers', ['timer']).
     controller('AppCtrl', function ($scope, socket) {
         $scope.orders = [];
-
+		
+		$scope.shownorders = [];
+		
+		$scope.seehistory = false;
+		$scope.toggleHistory = function() {
+			console.log("HERE");
+			console.log($scope.seehistory);
+			$scope.seehistory = !$scope.seehistory;
+			console.log($scope.seehistory);
+			$scope.shownorders = $scope.filterOrders();
+		};
+        
+        $scope.tlr = [
+            {'Viet Coffee' : 'Cafe'},
+            {'COLD' : 'Lanh'},
+                {'BBQ BM' : 'Banh Mi BBQ'},
+        ];
+        
+        $scope.getDescription = function(item) {
+            var desc = item["Receipt Description"];
+            for(var i=0;i<$scope.tlr.length;i++) {
+                /*console.log("-s-");
+                console.log(desc);
+                console.log($scope.tlr[i][desc]);
+                console.log("-e-");*/
+                if($scope.tlr[i][desc] != undefined) {
+                    return $scope.tlr[i][desc];
+                }
+            }
+            return desc;
+        }
+		
         socket.on('send:name', function (data) {
             $scope.name = data.name;
         });
-
+		
         socket.on('send:order', function (data) {
             //$scope.orders.push(data);
             var inserted = false;
@@ -21,10 +52,18 @@ angular.module('myApp.controllers', ['timer']).
             }
             if(!inserted)
                 $scope.orders.push(data);
+			
+			$scope.shownorders = $scope.filterOrders();
         });
 
-        $scope.isOrderAllDone = function(order) {
-            
+        $scope.filterOrders = function() {
+			var sorders = [];
+			for(var i=0;i<$scope.orders.length;i++) {
+				if(($scope.orders[i]['mon_all_done'] == 1 && $scope.seehistory == 1) ||
+					($scope.orders[i]['mon_all_done'] != 1 && $scope.seehistory != 1))
+					sorders.push($scope.orders[i]);
+			}
+			return sorders;
         }
 
         $scope.done = function(ordernumber, itemid) {
@@ -33,6 +72,14 @@ angular.module('myApp.controllers', ['timer']).
 
         $scope.undone = function(ordernumber, itemid) {
             socket.emit('send:undone', {'ordernumber': ordernumber, 'item':itemid});
+        };
+		
+		$scope.alldone = function(ordernumber) {
+			socket.emit('send:alldone', {'ordernumber': ordernumber});
+		};
+        
+        $scope.undoalldone = function(ordernumber) {
+            socket.emit('send:undoalldone', {'ordernumber': ordernumber});
         };
 
         $scope.gettime = function() {
