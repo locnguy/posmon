@@ -1,0 +1,24 @@
+p The current time is {{time}}. Total {{orders.length}} orders.
+
+This code is <strong>not</strong> escaped 
+
+table.table-striped.table-bordered.table-condensed
+    tr
+        td(dir-paginate="order in orders | itemsPerPage: 3", valign="top")
+            table.table.table-striped.table-bordered.table-condensed
+                tr
+                    th(colspan="3") Order#: {{order["Daily Order Sequence"]}} :: Server :: {{order["Server"]}}
+                tr(ng-repeat="item in order.items.rows")
+                    td
+                        {{item["Quantity"]}}
+                    td
+                        {{item["Receipt Description"]}}
+                    td 
+                        <timer start-time="startTime(order)">{{days}}d{{hours}}h{{minutes}} min, {{seconds}} sec.</timer>
+                    td
+                        span(ng-show="item['mon_done'] == 1")
+                            button.btn.btn-primary.btn-sm(ng-click="undone(order['Number'],item['Number'])") Redo/Undone
+                        span(ng-show="item['mon_done'] != 1")
+                            button.btn.btn-primary.btn-sm(ng-click="done(order['Number'],item['Number'])") Done
+    tr
+        td(colspan="3") <dir-pagination-controls template-url="bower_components/angular-utils-pagination/dirPagination.tpl.html"></dir-pagination-controls>
